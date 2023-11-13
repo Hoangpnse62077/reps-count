@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+    <title>Speech Rep and Countdown</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Speech Rep and Countdown</h1>
+
+        <!-- Form cho việc nhập thông tin tập luyện -->
+        <form id="workoutForm">
+            <div class="form-group">
+                <label for="minReps">Số reps tối thiểu</label>
+                <input type="number" class="form-control" id="minReps" min="1" placeholder="Nhập số reps tối thiểu" required>
+            </div>
+            <div class="form-group">
+                <label for="repTime">Thời gian thực hiện 1 rep (giây)</label>
+                <input type="number" class="form-control" id="repTime" min="1" placeholder="Nhập thời gian thực hiện 1 rep" required>
+            </div>
+            <div class="form-group">
+                <label for="holdTime">Thời gian giữ (giây)</label>
+                <input type="number" class="form-control" id="holdTime" min="0" placeholder="Nhập thời gian giữ" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="startWorkout()">Bắt đầu tập luyện</button>
+        </form>
+
+        <!-- Hiển thị kết quả và đếm ngược -->
+        <div id="result" class="mt-4"></div>
+        <div id="countdown" class="mt-4"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        function startWorkout() {
+            const minReps = document.getElementById("minReps").value;
+            const repTime = document.getElementById("repTime").value;
+            const holdTime = document.getElementById("holdTime").value;
+
+            let currentRep = 1;
+
+            function doRep() {
+                speak(`Rep ${currentRep}`);
+
+                let countdownSec = parseInt(repTime);
+                updateCountdownUI(countdownSec);
+
+                const countdownInterval = setInterval(function() {
+                    if (countdownSec > 0) {
+                        updateCountdownUI(countdownSec);
+                        countdownSec--;
+                    } else {
+                        clearInterval(countdownInterval);
+                        // speak(`${holdTime}.`);
+
+                        //document.getElementById('countdown').innerText = `Đếm ngược ${holdTime} giây`;
+
+                        let holdCountdown = parseInt(holdTime);
+
+                        const holdInterval = setInterval(function() {
+                            updateCountdownUI(holdCountdown);
+                                
+                            if (holdCountdown <= 0) {
+                                clearInterval(holdInterval);
+                                //document.getElementById('countdown').innerText = `Rep ${currentRep} hoàn thành. Chuẩn bị cho rep tiếp theo.`;
+                                currentRep++;
+
+                                if (currentRep <= minReps) {
+                                    setTimeout(doRep, 500); // Chờ 1 giây trước khi bắt đầu rep tiếp theo
+                                } else {
+                                    //document.getElementById('countdown').innerText = "Hoàn tất tập luyện!";
+                                    speak("Hoàn tất tập luyện!");
+                                }
+                            }
+                            else{
+                                speak(holdCountdown)
+                            }
+
+                            holdCountdown--;;
+                           
+                        }, 1000);
+                    }
+                }, 1000);
+            }
+
+            doRep(); // Bắt đầu tập luyện
+        }
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            synth.speak(utterance);
+           
+        }
+
+        function updateCountdownUI(seconds) {
+        }
+    </script>
+</body>
+</html>
